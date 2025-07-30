@@ -19,6 +19,14 @@ struct AddEditTaskView: View {
     
     let editingTask: TaskItem?
     
+    // Computed property to determine if we're editing an existing task
+    private var isEditingExistingTask: Bool {
+        guard let task = editingTask else { return false }
+        // If the task has a non-empty title, it's likely an existing task being edited
+        // If it has an empty title, it's likely a dummy task for adding new
+        return !task.title.isEmpty
+    }
+    
     init(taskViewModel: TaskViewModel, editingTask: TaskItem) {
         self.taskViewModel = taskViewModel
         self.editingTask = editingTask
@@ -44,7 +52,7 @@ struct AddEditTaskView: View {
                         .datePickerStyle(.compact)
                 }
                 
-                if let task = editingTask {
+                if isEditingExistingTask, let task = editingTask {
                     Section(header: Text("Task Status")) {
                         HStack {
                             Text("Status")
@@ -60,7 +68,7 @@ struct AddEditTaskView: View {
                     }
                 }
             }
-            .navigationTitle(editingTask != nil ? "Edit Task" : "New Task")
+            .navigationTitle(isEditingExistingTask ? "Edit Task" : "New Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -71,7 +79,7 @@ struct AddEditTaskView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(editingTask != nil ? "Save" : "Add") {
+                    Button(isEditingExistingTask ? "Save" : "Add") {
                         saveTask()
                     }
                     .foregroundColor(AppColors.primaryPurple)
@@ -99,7 +107,7 @@ struct AddEditTaskView: View {
         
         switch validationResult {
         case .success:
-            if let existingTask = editingTask {
+            if isEditingExistingTask, let existingTask = editingTask {
                 // Update existing task
                 var updatedTask = existingTask
                 updatedTask.title = trimmedTitle

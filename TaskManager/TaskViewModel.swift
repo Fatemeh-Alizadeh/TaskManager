@@ -20,7 +20,7 @@ class TaskViewModel: ObservableObject {
     init(taskManager: TaskManager = TaskManager()) {
         self.taskManager = taskManager
         setupBindings()
-        loadTasks()
+        // Initial loading is handled by the binding
     }
     
     // MARK: - Computed Properties
@@ -51,40 +51,40 @@ class TaskViewModel: ObservableObject {
     
     // MARK: - Task Operations
     
-        func addTask(_ task: TaskItem) {
+    func addTask(_ task: TaskItem) {
         isLoading = true
         taskManager.addTask(task)
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
 
     func updateTask(_ task: TaskItem) {
         isLoading = true
         taskManager.updateTask(task)
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
 
     func deleteTask(_ task: TaskItem) {
         isLoading = true
         taskManager.deleteTask(task)
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
 
     func toggleTaskCompletion(_ task: TaskItem) {
         isLoading = true
         taskManager.toggleTaskCompletion(task)
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
     
     func addSampleData() {
         isLoading = true
         taskManager.addSampleData()
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
     
     func clearAllData() {
         isLoading = true
         taskManager.clearAllData()
-        loadTasks()
+        // The binding will automatically update tasks and set isLoading = false
     }
     
     // MARK: - Private Methods
@@ -102,8 +102,8 @@ class TaskViewModel: ObservableObject {
     }
     
     private func loadTasks() {
-        // Tasks are automatically loaded through the binding
-        // This method can be used for additional loading logic if needed
+        // Tasks are automatically loaded through the binding setup in setupBindings()
+        // No additional loading logic is needed as the TaskManager handles persistence
     }
     
     // MARK: - Task Validation

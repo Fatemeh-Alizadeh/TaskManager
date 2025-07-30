@@ -18,6 +18,8 @@ struct TaskListView: View {
     @State private var showingAddTask = false
     @State private var editingTask: TaskItem?
     @State private var showingSettings = false
+    @State private var taskToDelete: TaskItem?
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         NavigationView {
@@ -56,6 +58,10 @@ struct TaskListView: View {
                                     onEdit: {
                                         editingTask = task
                                     },
+                                    onDelete: {
+                                        taskToDelete = task
+                                        showingDeleteConfirmation = true
+                                    },
                                     allowCompletion: allowCompletion
                                 )
                                 .padding(.horizontal, 16)
@@ -92,6 +98,16 @@ struct TaskListView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView(taskViewModel: taskViewModel)
+            }
+            .alert("Delete Task", isPresented: $showingDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    if let taskToDelete = taskToDelete {
+                        taskViewModel.deleteTask(taskToDelete)
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this task? This action cannot be undone.")
             }
         }
     }

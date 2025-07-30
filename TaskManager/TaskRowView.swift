@@ -11,6 +11,7 @@ struct TaskRowView: View {
     let task: TaskItem
     let onToggle: () -> Void
     let onEdit: () -> Void
+    let onDelete: () -> Void
     let allowCompletion: Bool
     
     var body: some View {
@@ -69,13 +70,24 @@ struct TaskRowView: View {
                 }
             }
             
-            // Edit button
-            Button(action: onEdit) {
-                Image(systemName: "pencil")
-                    .foregroundColor(AppColors.primaryPurple)
-                    .font(.title3)
+            // Action buttons
+            HStack(spacing: 8) {
+                // Edit button
+                Button(action: onEdit) {
+                    Image(systemName: "pencil")
+                        .foregroundColor(AppColors.primaryPurple)
+                        .font(.title3)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                // Delete button
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                        .foregroundColor(AppColors.statusOverdue)
+                        .font(.title3)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(PlainButtonStyle())
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
