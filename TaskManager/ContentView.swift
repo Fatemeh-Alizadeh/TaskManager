@@ -6,83 +6,77 @@
 //
 
 import SwiftUI
-import CoreData
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+    @StateObject private var taskViewModel = TaskViewModel()
+    
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        TabView {
+            // Current Tasks Tab
+            TaskListView(
+                taskViewModel: taskViewModel,
+                tasks: taskViewModel.currentTasks,
+                title: "Current Tasks",
+                emptyMessage: "No current tasks\nTap the + button to add a new task",
+                emptyIcon: "checklist",
+                allowCompletion: true
+            )
+            .tabItem {
+                Image(systemName: "list.bullet")
+                Text("Current")
             }
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            
+            // Completed Tasks Tab
+            TaskListView(
+                taskViewModel: taskViewModel,
+                tasks: taskViewModel.completedTasks,
+                title: "Completed Tasks",
+                emptyMessage: "No completed tasks yet\nComplete some tasks to see them here",
+                emptyIcon: "checkmark.circle",
+                allowCompletion: true
+            )
+            .tabItem {
+                Image(systemName: "checkmark.circle.fill")
+                Text("Completed")
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            
+            // Unfinished Tasks Tab
+            TaskListView(
+                taskViewModel: taskViewModel,
+                tasks: taskViewModel.unfinishedTasks,
+                title: "Unfinished Tasks",
+                emptyMessage: "No overdue tasks\nGreat job staying on schedule!",
+                emptyIcon: "exclamationmark.triangle",
+                allowCompletion: false
+            )
+            .tabItem {
+                Image(systemName: "exclamationmark.triangle.fill")
+                Text("Unfinished")
             }
         }
+        .accentColor(AppColors.primaryPurple)
+        .onAppear {
+            // Set up tab bar appearance with purple theme
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor(AppColors.backgroundPrimary)
+            
+            // Customize tab bar colors
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.primaryPurple)
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.primaryPurple)]
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.textSecondary)
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(AppColors.textSecondary)]
+            
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+            
+            // Add sample data for first launch
+            taskViewModel.addSampleData()
+        }
+        .purpleNavigationBar()
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    ContentView()
 }
